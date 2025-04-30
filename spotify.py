@@ -25,7 +25,7 @@ for item in items:
 
     # corrects
     if name.lower() == artist_query.lower():
-        if 
+        
         print("Artist " + name + " found!")
         with open('search_results.txt', 'w') as f:
             id = item['id']
