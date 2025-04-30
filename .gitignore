@@ -1,2 +1,4 @@
 .env
 .DS_Store
+.cache
+search_results.txt
