@@ -1,13 +1,15 @@
 from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+import base64
 
 def setup():
     # load credentials + set up client
     load_dotenv()
-    scope = "user-library-read playlist-modify-private playlist-modify-public user-library-modify"
+    scope = "user-library-read playlist-modify-private playlist-modify-public user-library-modify ugc-image-upload"
     global sp 
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+
 
 def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
     print("\nSEARCH RESULTS FOR \'" + artist_query + "\'")
@@ -88,15 +90,21 @@ def artist_query(artist_query, acceptable_genres):
         return top_tracks_uris
     return []
 
-def create_playlist(user_id, name):
+def create_playlist(user_id, name, description, encoded_cover_image_string):
     current_playlists_json = sp.current_user_playlists()['items']
     for playlist in current_playlists_json:
         if name == playlist['name']:
             print("Playlist \'" + name + "\' exists, appending instead of creating.")
+            # update cover image and description if there
+            if encoded_cover_image_string:
+                sp.playlist_upload_cover_image(playlist_id=playlist['id'], image_b64=encoded_cover_image_string)
+            if description:
+                sp.playlist_change_details(playlist_id=playlist['id'], description=description)
             return playlist['id']
 
     print("Creating new playlist \'" + name + "\'")
-    playlist_output = sp.user_playlist_create(user=user_id, name=name)
+    playlist_output = sp.user_playlist_create(user=user_id, name=name, description=description)
+    sp.playlist_upload_cover_image(playlist_output['id'], encoded_cover_image_string)
     return playlist_output['id']
 
 def add_tracks_to_playlist(playlist_id, top_track_uris):
@@ -112,11 +120,20 @@ def main():
     live_input_mode = input("Would you like to use live input mode? (y/n) ")
     live_input_mode = (False, True)[live_input_mode.lower() == 'y' or live_input_mode.lower() == 'yes']
 
-    artists = ['e town concrete', 'd blocc']
+    artists = ['e-town concrete', 'cold world', 'never ending game', 'big boy', 'eighteen visions', 'fury',
+               'apex predator', 'bad beat', 'cosmic joke', 'cyadine', 'd bloc', 'death before dishonor', 'doflame',
+               'gag', 'home invasion', 'queensway', 'limb from limb', 'si dios quiere', 'snuffed on sight',
+               'warhound', 'world of pain']
     acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore']
+    playlist_name = 'RUMBLE 2025'
+    playlist_description = "July 27 & 28, Cobra Lounge beatdown"   # optional
+    playlist_cover_image_path = "/Users/iphone./Downloads/RumbleCover2025_reduced2.jpg" # optional
+    with open(playlist_cover_image_path, "rb") as image_file:
+        encoded_cover_image_string = base64.b64encode(image_file.read())
+
     setup()
     user_id = sp.current_user()['id']
-    playlist_id = create_playlist(user_id, 'python_test_corrections')
+    playlist_id = create_playlist(user_id, playlist_name, playlist_description, encoded_cover_image_string)
     
     for artist in artists:
         top_track_uris = artist_query(artist, acceptable_genres)
