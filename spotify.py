@@ -9,46 +9,41 @@ def setup():
     global sp 
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
-    # clear txt file for testing
-    open('search_results.txt', 'w').close()
-
-def get_artist_top_tracks(items, artist_query, acceptable_genres):
-    for item in items:
+def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
+    print("\nSEARCH RESULTS FOR \'" + artist_query + "\'")
+    print("-------------------------------------------------------")
+    for item in artist_items:
+        
         # check genre to make sure it is the correct band
         genres = item['genres']
+        common_genres = [element for element in genres if element in acceptable_genres]
         # check name for same
         name = item['name']
         print("Name: " + name)
         print("Genres: ", genres)
-
-        # correct
-        if name.lower() == artist_query.lower():
-            print("Artist " + name + " found!")
-            common_genres = [element for element in genres if element in acceptable_genres]
-            if len(common_genres) == 0:
-                print("WARNING: Artist genre not in acceptable genres. Result may be incorrect.")
-            with open('search_results.txt', 'a') as f:
-                id = item['id']
-                uri = item['uri']
-                top_tracks_json = sp.artist_top_tracks(id, country='US')['tracks']
-                top_tracks = []
-                for track in top_tracks_json:
-                    track_name = track['name']
-                    track_uri = track['uri']
-                    # track_id = track['id']
-                    top_tracks.append({"track_name": track_name, "track_uri": track_uri})
-                
-                print("Artist: " + name, file=f)
-                print("Genres: ", genres, file=f)
-                print("ID: " + id, file=f)
-                print("URI: " + uri, file=f)
-                print("Top tracks: ", top_tracks, file=f)
-                print("\n\n", file=f)
+        
+        if name.lower() == artist_query.lower() and len(common_genres) == 0:
+            print("Found an artist named " + name + " but with no matching genres. Skipping. Adjust the acceptable genres list to contain at least one of the following if you believe this is a mistake:")
+            print(genres)
+            print()
+            continue
+        elif name.lower() == artist_query.lower():
+            print("Artist " + name + " found with common genres: ", common_genres)
+            id = item['id']
+            top_tracks_json = sp.artist_top_tracks(id, country='US')['tracks']
+            top_tracks = []
+            for track in top_tracks_json:
+                track_name = track['name']
+                track_uri = track['uri']
+                # track_id = track['id']
+                top_tracks.append({"track_name": track_name, "track_uri": track_uri})
             
             return top_tracks
+        elif name.lower() != artist_query.lower() and len(common_genres) > 0:
+            print("Did you mean " + name + " instead of \'" + artist_query + "\'? If so, please correct the list of artists in main function.\n")
+            continue
 
-        print("NO MATCH\n\n")
-        return []
+    return []
 
 def artist_query(artist_query, acceptable_genres):
     search_results = sp.search(q='artist:' + artist_query, type='artist')
@@ -79,11 +74,10 @@ def add_tracks_to_playlist(playlist_id, top_track_uris):
         sp.playlist_add_items(playlist_id,[uri])
 
 def main():
-    artists = ['prevention', 'big ass truck i.e.', 'barrio slam']
+    artists = ['foundation', 'cold as life', 'two witnesses', 'magnitude', 'suburban scum', 'prevention', 'big ass truck i.e.', 'barrio slam', 'bulldoze']
     acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore']
     setup()
     user_id = sp.current_user()['id']
-
     playlist_id = create_playlist(user_id, 'python_test')
     
     for artist in artists:
