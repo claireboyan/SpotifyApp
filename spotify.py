@@ -14,6 +14,10 @@ def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
     print("-------------------------------------------------------")
     n = 0
 
+    # if artist_query == 'e town concrete':
+    #     with open("search_results.txt", 'w') as f:
+    #         print(artist_items, file=f)
+
     for item in artist_items:
         n += 1
         # check genre to make sure it is the correct band
@@ -108,7 +112,7 @@ def main():
     live_input_mode = input("Would you like to use live input mode? (y/n) ")
     live_input_mode = (False, True)[live_input_mode.lower() == 'y' or live_input_mode.lower() == 'yes']
 
-    artists = ['big ass truck', 'xweapon', 'combichrist', 'skinny puppy']
+    artists = ['e town concrete', 'd blocc']
     acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore']
     setup()
     user_id = sp.current_user()['id']
