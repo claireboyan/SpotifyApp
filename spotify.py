@@ -34,9 +34,9 @@ def get_artist_top_tracks(items, artist_query, acceptable_genres):
                 top_tracks = []
                 for track in top_tracks_json:
                     track_name = track['name']
-                    # track_uri = track['uri']
+                    track_uri = track['uri']
                     # track_id = track['id']
-                    top_tracks.append(track_name)
+                    top_tracks.append({"track_name": track_name, "track_uri": track_uri})
                 
                 print("Artist: " + name, file=f)
                 print("Genres: ", genres, file=f)
@@ -54,14 +54,45 @@ def artist_query(artist_query, acceptable_genres):
     search_results = sp.search(q='artist:' + artist_query, type='artist')
     items = search_results['artists']['items']
     top_tracks = get_artist_top_tracks(items, artist_query, acceptable_genres)
-    return top_tracks
+    if len(top_tracks) > 0:
+        top_tracks_uris = [element['track_uri'] for element in top_tracks]
+        return top_tracks_uris
+    return []
+
+def create_playlist(user_id, name):
+    current_playlists_json = sp.current_user_playlists()['items']
+    for playlist in current_playlists_json:
+        if name == playlist['name']:
+            print("Playlist \'" + name + "\' exists, appending instead of creating.")
+            return playlist['id']
+
+    print("Creating new playlist \'" + name + "\'")
+    playlist_output = sp.user_playlist_create(user=user_id, name=name)
+    return playlist_output['id']
+
+def add_tracks_to_playlist(playlist_id, top_track_uris):
+    playlist_tracks_json = sp.playlist_tracks(playlist_id)['items']
+    playlist_track_uris = [element['track']['uri'] for element in playlist_tracks_json]
+    for uri in top_track_uris:
+        if uri in playlist_track_uris:
+            continue
+        sp.playlist_add_items(playlist_id,[uri])
 
 def main():
-    artists = ['foundation', 'cold as life', 'two witnesses', 'magnitude', 'suburban scum']
+    artists = ['prevention', 'big ass truck i.e.', 'barrio slam']
     acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore']
     setup()
-    for artist in artists:
-        top_tracks = artist_query(artist, acceptable_genres)
+    user_id = sp.current_user()['id']
 
+    playlist_id = create_playlist(user_id, 'python_test')
+    
+    for artist in artists:
+        top_track_uris = artist_query(artist, acceptable_genres)
+        if len(top_track_uris) == 0:
+            print("There was no match found for \'" + artist + ".\' Continuing")
+            continue
+
+        add_tracks_to_playlist(playlist_id, top_track_uris)
+        
 if __name__=="__main__":
     main()
