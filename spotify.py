@@ -9,7 +9,9 @@ def setup():
     scope = "user-library-read playlist-modify-private playlist-modify-public user-library-modify ugc-image-upload"
     global sp 
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
-
+    
+    # clear error log
+    open('error_log.txt', 'w').close()
 
 def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
     print("\nSEARCH RESULTS FOR \'" + artist_query + "\'")
@@ -36,6 +38,10 @@ def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
         if name.lower() == artist_query.lower() and len(common_genres) == 0:
             if not live_input_mode:
                 print("Found an artist named " + name + " but with no matching genres. Skipping. Adjust the acceptable genres list to contain at least one of the genres from this search result if you believe this is a mistake.\n")
+                # with open("error_log.txt", "a") as f:
+                #     print("No matches found for \'" + artist_query + "\'.", f)
+                #     print("Name matched, but no common genres were found. Search results were:\n", f)
+                #     print(artist_items, f)
                 continue
 
             print("Found an artist named " + name + " but with no matching genres. Their genres are listed as:")
@@ -51,6 +57,10 @@ def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
         elif name.lower() != artist_query.lower() and len(common_genres) > 0:
             if not live_input_mode:
                 print("Did you mean " + name + " instead of \'" + artist_query + "\'? If so, please correct the list of artists in main function.\n")
+                # with open("error_log.txt", "a") as f:
+                #     print("No matches found for \'" + artist_query + "\'.", f)
+                #     print("Name did not match, but similar results with common genres were found. Search results were:\n", f)
+                #     print(artist_items, f)
                 continue
 
             print("Found an artist named " + name + " with common genres: ")
@@ -78,7 +88,9 @@ def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
         
         return top_tracks
         
-
+    with open("error_log.txt", "a") as f:
+        f.write("No matches of any kind found for \'" + artist_query + "\'. Search results were:\n")
+        f.write(str(artist_items))
     return []
 
 def artist_query(artist_query, acceptable_genres):
@@ -120,12 +132,13 @@ def main():
     live_input_mode = input("Would you like to use live input mode? (y/n) ")
     live_input_mode = (False, True)[live_input_mode.lower() == 'y' or live_input_mode.lower() == 'yes']
 
-    artists = ['e-town concrete', 'cold world', 'never ending game', 'big boy', 'eighteen visions', 'fury',
-               'apex predator', 'bad beat', 'cosmic joke', 'cyadine', 'd bloc', 'death before dishonor', 'doflame',
-               'gag', 'home invasion', 'queensway', 'limb from limb', 'si dios quiere', 'snuffed on sight',
-               'warhound', 'world of pain']
+    # artists = ['e-town concrete', 'cold world', 'never ending game', 'big boy', 'eighteen visions', 'fury',
+    #            'apex predator', 'bad beat', 'cosmic joke', 'cyadine', 'd bloc', 'death before dishonor', 'doflame',
+    #            'gag', 'home invasion', 'queensway', 'limb from limb', 'si dios quiere', 'snuffed on sight',
+    #            'warhound', 'world of pain']
+    artists = ['fury', 'gag', 'cyadine', 'snuffed on sight']
     acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore']
-    playlist_name = 'RUMBLE 2025'
+    playlist_name = 'RUMBLE TEST'
     playlist_description = "July 27 & 28, Cobra Lounge beatdown"   # optional
     playlist_cover_image_path = "/Users/iphone./Downloads/RumbleCover2025_reduced2.jpg" # optional
     with open(playlist_cover_image_path, "rb") as image_file:
