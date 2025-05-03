@@ -16,10 +16,6 @@ def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
     print("-------------------------------------------------------")
     n = 0
 
-    # if artist_query == 'e town concrete':
-    #     with open("search_results.txt", 'w') as f:
-    #         print(artist_items, file=f)
-
     for item in artist_items:
         n += 1
         # check genre to make sure it is the correct band
@@ -73,7 +69,6 @@ def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
         for track in top_tracks_json:
             track_name = track['name']
             track_uri = track['uri']
-            # track_id = track['id']
             top_tracks.append({"track_name": track_name, "track_uri": track_uri})
         
         return top_tracks
@@ -90,22 +85,31 @@ def artist_query(artist_query, acceptable_genres):
         return top_tracks_uris
     return []
 
+def update_description_and_cover(playlist_id, description, encoded_cover_image_string):
+    if encoded_cover_image_string:
+        sp.playlist_upload_cover_image(playlist_id, image_b64=encoded_cover_image_string)
+    if description:
+        sp.playlist_change_details(playlist_id, description=description)
+
 def create_playlist(user_id, name, description, encoded_cover_image_string):
+    playlist_id = ''
+    # check if playlist already exists
     current_playlists_json = sp.current_user_playlists()['items']
     for playlist in current_playlists_json:
         if name == playlist['name']:
             print("Playlist \'" + name + "\' exists, appending instead of creating.")
-            # update cover image and description if there
-            if encoded_cover_image_string:
-                sp.playlist_upload_cover_image(playlist_id=playlist['id'], image_b64=encoded_cover_image_string)
-            if description:
-                sp.playlist_change_details(playlist_id=playlist['id'], description=description)
-            return playlist['id']
+            playlist_id = playlist['id']
 
-    print("Creating new playlist \'" + name + "\'")
-    playlist_output = sp.user_playlist_create(user=user_id, name=name, description=description)
-    sp.playlist_upload_cover_image(playlist_output['id'], encoded_cover_image_string)
-    return playlist_output['id']
+    if not playlist_id:
+        # create new if doesn't exist already
+        print("Creating new playlist \'" + name + "\'")
+        playlist_output = sp.user_playlist_create(user=user_id, name=name)
+        playlist_id = playlist_output['id']
+
+    # update cover image and description if there
+    update_description_and_cover(playlist_id, description, encoded_cover_image_string)
+    
+    return playlist_id
 
 def add_tracks_to_playlist(playlist_id, top_track_uris):
     playlist_tracks_json = sp.playlist_tracks(playlist_id)['items']
@@ -120,16 +124,16 @@ def main():
     live_input_mode = input("Would you like to use live input mode? (y/n) ")
     live_input_mode = (False, True)[live_input_mode.lower() == 'y' or live_input_mode.lower() == 'yes']
 
-    artists = ['e-town concrete', 'cold world', 'never ending game', 'big boy', 'eighteen visions', 'fury',
-               'apex predator', 'bad beat', 'cosmic joke', 'cyadine', 'd bloc', 'death before dishonor', 'doflame',
-               'gag', 'home invasion', 'queensway', 'limb from limb', 'si dios quiere', 'snuffed on sight',
-               'warhound', 'world of pain']
-    acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore']
-    playlist_name = 'RUMBLE 2025'
-    playlist_description = "July 27 & 28, Cobra Lounge beatdown"   # optional
-    playlist_cover_image_path = "/Users/iphone./Downloads/RumbleCover2025_reduced2.jpg" # optional
-    with open(playlist_cover_image_path, "rb") as image_file:
-        encoded_cover_image_string = base64.b64encode(image_file.read())
+    artists = ['x-rx', 'combichrist', 'fatal realm', 'roy orbison']
+    acceptable_genres = ['industrial', 'hardcore', 'hardcore punk', 'metalcore', 'ebm']
+    playlist_name = 'TESTESTEST'
+    playlist_description = "kill yourself"   # optional
+    playlist_cover_image_path = "/Users/iphone./Downloads/maxresdefault.jpg"  # optional
+    if playlist_cover_image_path:
+        with open(playlist_cover_image_path, "rb") as image_file:
+            encoded_cover_image_string = base64.b64encode(image_file.read())
+    else:
+        encoded_cover_image_string = ''
 
     setup()
     user_id = sp.current_user()['id']

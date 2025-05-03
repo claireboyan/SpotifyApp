@@ -13,3 +13,7 @@ Examples:
 However, searching *e.town concrete*, *e town concrete*, or *e-town concrete* in the search API returns the correct top result.
 
 Keep this in mind.
+
+### Intermittent Invalid Client Error
+
+If your credentials match the ones in the app, you might just need to delete the cache file.
