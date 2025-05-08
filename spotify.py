@@ -18,11 +18,13 @@ def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
     print("-------------------------------------------------------")
     n = 0
 
-    # if artist_query == 'e town concrete':
-    #     with open("search_results.txt", 'w') as f:
-    #         print(artist_items, file=f)
-
     for item in artist_items:
+        with open("error_log.txt", 'a') as f:
+            print("QUERY: " + artist_query)
+            print("RESULTS:\n")
+            print(str(artist_items))
+            print("------------------------------------------------")
+
         n += 1
         # check genre to make sure it is the correct band
         genres = item['genres']
@@ -88,13 +90,17 @@ def get_artist_top_tracks(artist_items, artist_query, acceptable_genres):
         
         return top_tracks
         
-    with open("error_log.txt", "a") as f:
-        f.write("No matches of any kind found for \'" + artist_query + "\'. Search results were:\n")
-        f.write(str(artist_items))
+    # with open("error_log.txt", "a") as f:
+    #     f.write("No matches of any kind found for \'" + artist_query + "\'. Search results were:\n")
+    #     f.write(str(artist_items))
     return []
 
 def artist_query(artist_query, acceptable_genres):
     search_results = sp.search(q='artist:' + artist_query, type='artist')
+    print("\n****************************************")
+    print("SEARCH RESULTS:")
+    print(search_results)
+    print("****************************************\n")
     items = search_results['artists']['items']
     top_tracks = get_artist_top_tracks(items, artist_query, acceptable_genres)
     if len(top_tracks) > 0:
@@ -132,12 +138,12 @@ def main():
     live_input_mode = input("Would you like to use live input mode? (y/n) ")
     live_input_mode = (False, True)[live_input_mode.lower() == 'y' or live_input_mode.lower() == 'yes']
 
-    # artists = ['e-town concrete', 'cold world', 'never ending game', 'big boy', 'eighteen visions', 'fury',
-    #            'apex predator', 'bad beat', 'cosmic joke', 'cyadine', 'd bloc', 'death before dishonor', 'doflame',
-    #            'gag', 'home invasion', 'queensway', 'limb from limb', 'si dios quiere', 'snuffed on sight',
-    #            'warhound', 'world of pain']
-    artists = ['fury', 'gag', 'cyadine', 'snuffed on sight']
-    acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore']
+    artists = ['e-town concrete', 'cold world', 'never ending game', 'big boy', 'eighteen visions', 'fury',
+               'apex predator', 'bad beat', 'cosmic joke', 'cyadine', 'd bloc', 'death before dishonor', 'doflame',
+               'gag', 'home invasion', 'queensway', 'limb from limb', 'si dios quiere', 'snuffed on sight',
+               'warhound', 'world of pain']
+    # artists = ['fury']
+    acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore', 'grindcore', 'deathcore']
     playlist_name = 'RUMBLE TEST'
     playlist_description = "July 27 & 28, Cobra Lounge beatdown"   # optional
     playlist_cover_image_path = "/Users/iphone./Downloads/RumbleCover2025_reduced2.jpg" # optional
