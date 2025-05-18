@@ -124,11 +124,14 @@ def main():
     live_input_mode = input("Would you like to use live input mode? (y/n) ")
     live_input_mode = (False, True)[live_input_mode.lower() == 'y' or live_input_mode.lower() == 'yes']
 
-    artists = ['x-rx', 'combichrist', 'fatal realm', 'roy orbison']
-    acceptable_genres = ['industrial', 'hardcore', 'hardcore punk', 'metalcore', 'ebm']
-    playlist_name = 'TESTESTEST'
-    playlist_description = "kill yourself"   # optional
-    playlist_cover_image_path = "/Users/iphone./Downloads/maxresdefault.jpg"  # optional
+    artists = ['e-town concrete', 'cold world', 'never ending game', 'big boy', 'eighteen visions', 'fury', 'apex predator', 'bad beat', 'cosmic joke', 'cyadine', 'd-bloc', 'death before dishonor', 'doflame', 'gag', 'home invasion', 'queensway', 'limb from limb', 'si dios quiere', 'warhound', 'world of pain',
+               'the killer', 'sector', 'homicidal', 'silverhammer', 'heavy down', 'hell is real',
+               'cloakroom', 'bleached cross', 'turquoise', 'illusion of choice',
+               'outta pocket', 'pain clinic', 'power of fear', 'cyclops', 'absent soul']
+    acceptable_genres = ['hardcore', 'hardcore punk', 'metalcore', 'metal', 'thrash metal', 'speed metal', 'grindcore']
+    playlist_name = 'THE RUMBLE 2025 (comprehensive)'
+    playlist_description = "Main event and preshow/aftershow artists (6/26/2025-6/28/2025)"   # optional
+    playlist_cover_image_path = "/Users/iphone./Downloads/RumbleCover2025_reduced2.jpg"  # optional
     if playlist_cover_image_path:
         with open(playlist_cover_image_path, "rb") as image_file:
             encoded_cover_image_string = base64.b64encode(image_file.read())
@@ -143,6 +146,9 @@ def main():
         top_track_uris = artist_query(artist, acceptable_genres)
         if len(top_track_uris) == 0:
             print("\nNo matches found for query \'" + artist + "\'. Continuing...")
+            with open ("error_log.txt", "a") as f:
+                f.write(artist)
+                f.write('\n')
             continue
 
         add_tracks_to_playlist(playlist_id, top_track_uris)
